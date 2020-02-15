@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/micro/go-micro"
 	pb "github.com/ruandao/micro-shippy-consignment-service/proto/consignment"
+	vesselProto "github.com/ruandao/micro-shippy-vessel-service/proto/vessel"
+	"log"
 	"sync"
 )
 
@@ -43,12 +45,29 @@ func (repo *Repository) GetAll() []*pb.Consignment {
 // to give you a better idea.
 type service struct {
 	repo repository
+	vesselClient vesselProto.VesselServiceClient
 }
 
 // CreateConsignment - we created just one method on our service,
 // which is a create method, which takes a context and a request as an
 // argument, these are handled by the gRPC server.
 func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, res *pb.Response) error {
+	// Here we call a client instance of our vessel service with our consignment weight,
+	// and the amount of containers as the capacity value
+	vesselResponse, err := s.vesselClient.FindAvailable(context.Background(), &vesselProto.Specification{
+		Capacity: int32(len(req.Containers)),
+		MaxWeight:req.Weight,
+	})
+	log.Printf("Found vessel: %s \n", vesselResponse.Vessel.Name)
+	if err != nil {
+		return err
+	}
+
+	// We set the VesselId as the vessel we got back from our
+	// vessel service
+	req.VesselId = vesselResponse.Vessel.Id
+
+
 	// Save our consignment
 	consignment, err := s.repo.Create(req)
 	if err != nil {
@@ -79,8 +98,9 @@ func main() {
 	// Init will parse the command line flags.
 	srv.Init()
 
+	vesselClient := vesselProto.NewVesselServiceClient("go.micro.srv.vessel", srv.Client())
 	// Register handler
-	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo})
+	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo, vesselClient})
 
 	// Run the server
 	if err := srv.Run(); err != nil {
