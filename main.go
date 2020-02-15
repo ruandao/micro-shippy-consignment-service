@@ -83,7 +83,6 @@ func main() {
 	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo})
 
 	// Run the server
-	fmt.Println(srv.Name() + " running...")
 	if err := srv.Run(); err != nil {
 		fmt.Println(err)
 	}
