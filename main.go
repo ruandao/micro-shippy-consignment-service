@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	pb "github.com/ruandao/micro-shippy-consignment-service/proto/consignment"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
-	pb "github.com/ruandao/micro-shippy-consignment-service/proto/consignment"
 	"sync"
 )
 
@@ -15,14 +15,14 @@ const (
 )
 
 type repository interface {
-	Create(*pb.Consignment)(*pb.Consignment, error)
+	Create(*pb.Consignment) (*pb.Consignment, error)
 	GetAll() []*pb.Consignment
 }
 
 // Repository - Dummy repository, this simulates the use of a datastore
 // of some kind. We'll replace this with a real implementation later on.
 type Repository struct {
-	mu 	sync.RWMutex
+	mu           sync.RWMutex
 	consignments []*pb.Consignment
 }
 
@@ -59,10 +59,10 @@ func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment) (*
 
 	// Return matching the `Response` message we created in our
 	// protobuf defintion.
-	return &pb.Response{Created: true, Consignment:consignment}, nil
+	return &pb.Response{Created: true, Consignment: consignment}, nil
 }
 
-func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest) (*pb.Response, error)  {
+func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest) (*pb.Response, error) {
 	consignments := s.repo.GetAll()
 	return &pb.Response{Consignments: consignments}, nil
 }
