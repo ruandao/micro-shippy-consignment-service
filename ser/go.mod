@@ -1,4 +1,4 @@
-module github.com/ruandao/micro-shippy-consignment-service
+module github.com/ruandao/micro-shippy-consignment-service-ser
 
 go 1.13
 

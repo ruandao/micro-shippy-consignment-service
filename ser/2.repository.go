@@ -1,8 +1,8 @@
-package ser
+package main
 
 import (
 	"context"
-	pb "github.com/ruandao/micro-shippy-consignment-service/proto/consignment"
+	pb "github.com/ruandao/micro-shippy-consignment-service-ser/proto/consignment"
 )
 
 type Consignment struct {
